@@ -192,9 +192,37 @@
     .btn:hover{transform:none}
   }
   :focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:4px}
+
+  /* ---- mega: hero fx canvas ---- */
+  #fx{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.9}
+  /* scroll progress (measurement) */
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--moss),var(--wheat));z-index:40;transition:width .12s ease-out}
+  /* spine nodes activate on scroll = measurement axis */
+  .node{transition:background .5s ease,box-shadow .5s ease,border-color .5s ease,transform .5s ease}
+  .node.on{background:var(--moss);border-color:var(--moss);transform:translate(-50%,-50%) rotate(45deg) scale(1.15);
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--moss) 22%,transparent),0 0 18px color-mix(in srgb,var(--moss) 55%,transparent)}
+  @media (max-width:760px){.node.on{transform:translate(-50%,-50%) rotate(45deg) scale(1.15)}}
+  /* hero load choreography */
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .hero .kicker,.hero h1,.hero .lead,.hero .cta-row,.hero .stat-strip{animation:rise .85s cubic-bezier(.2,.7,.2,1) both}
+  .hero h1{animation-delay:.07s}.hero .lead{animation-delay:.18s}.hero .cta-row{animation-delay:.28s}.hero .stat-strip{animation-delay:.36s}
+  /* refined reveal + card hover */
+  .reveal{filter:blur(6px)}
+  .reveal.in{filter:none}
+  .card{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+  .card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--moss) 45%,var(--line));box-shadow:0 14px 40px rgba(20,17,12,.13)}
+  .stat{transition:background .22s ease}
+  .stat:hover{background:var(--surface-2)}
+  @media (prefers-reduced-motion:reduce){
+    #fx{display:none}
+    .hero .kicker,.hero h1,.hero .lead,.hero .cta-row,.hero .stat-strip{animation:none}
+    .reveal{filter:none}
+    .node{transition:none}
+  }
 </style>
 <script>(function(){try{var s=localStorage.getItem('rs-theme');document.documentElement.setAttribute('data-theme',s==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 
+<div id="prog" aria-hidden="true"></div>
 <header class="bar">
   <div class="wrap">
     <a class="brand" href="#" aria-label="Regeneratywne stado — strona główna"><?xml version="1.0" encoding="utf-8"?>
@@ -359,6 +387,7 @@
 
 <section class="hero">
   <span class="spine" aria-hidden="true"></span>
+  <canvas id="fx" aria-hidden="true"></canvas>
   <div class="wrap">
     <span class="kicker eyebrow">NCBR · AGROSTRATEG · konsorcjum w budowie</span>
     <h1>Zmierzmy prawdziwy ślad dobrze prowadzonego stada — i dajmy rolnikom <em>narzędzie</em>, które go udowodni.</h1>
@@ -546,5 +575,43 @@
       es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
     },{threshold:.12});
     document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+    var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+    // spine nodes activate as sections scroll in (measurement axis)
+    var no=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});
+    },{threshold:1,rootMargin:'-40% 0px -40% 0px'});
+    document.querySelectorAll('.node').forEach(function(n){no.observe(n);});
+
+    // scroll progress bar
+    var prog=document.getElementById('prog');
+    function onScroll(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+      prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%';}
+    addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    // hero sensor field (canvas) — the digital-twin motif, alive and subtle
+    var c=document.getElementById('fx');
+    if(c && !reduce){
+      var x=c.getContext('2d'),hero=c.parentElement,dpr=Math.min(devicePixelRatio||1,2),pts=[],raf=null;
+      function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+      function size(){var r=hero.getBoundingClientRect();c.width=Math.max(1,r.width*dpr);c.height=Math.max(1,r.height*dpr);c.style.width=r.width+'px';c.style.height=r.height+'px';}
+      function init(){pts=[];var n=Math.min(48,Math.floor(c.width/dpr/28));for(var i=0;i<n;i++)pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.14*dpr,vy:(Math.random()-.5)*.14*dpr,r:(Math.random()*1.5+.7)*dpr});}
+      function draw(){
+        x.clearRect(0,0,c.width,c.height);
+        var moss=css('--moss')||'#6D8B3D',lim=118*dpr;
+        for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+          if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;
+          for(var j=i+1;j<pts.length;j++){var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+            if(d<lim){x.globalAlpha=(1-d/lim)*.13;x.strokeStyle=moss;x.lineWidth=1*dpr;x.beginPath();x.moveTo(p.x,p.y);x.lineTo(q.x,q.y);x.stroke();}}}
+        for(var k=0;k<pts.length;k++){var pp=pts[k];x.globalAlpha=.45;x.fillStyle=moss;x.beginPath();x.arc(pp.x,pp.y,pp.r,0,6.2832);x.fill();}
+        x.globalAlpha=1;raf=requestAnimationFrame(draw);
+      }
+      function start(){if(!raf){raf=requestAnimationFrame(draw);}}
+      function stop(){if(raf){cancelAnimationFrame(raf);raf=null;}}
+      size();init();start();
+      var rt;addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){stop();size();init();start();},150);});
+      new IntersectionObserver(function(e){e[0].isIntersecting?start():stop();},{threshold:0}).observe(hero);
+    }
   })();
 </script>
