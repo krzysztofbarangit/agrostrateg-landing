@@ -1,0 +1,3 @@
+# Hub — plaintext build inputs must NEVER reach the public repo.
+# Only hub/index.html (the encrypted output) and hub/build.mjs are committed.
+hub/src/
