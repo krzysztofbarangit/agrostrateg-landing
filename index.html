@@ -193,6 +193,7 @@
   }
   :focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:4px}
 </style>
+<script>(function(){try{var s=localStorage.getItem('rs-theme');document.documentElement.setAttribute('data-theme',s==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 
 <header class="bar">
   <div class="wrap">
@@ -538,6 +539,7 @@
     tt.addEventListener('click',function(){
       var n=cur()==='dark'?'light':'dark';
       document.documentElement.setAttribute('data-theme',n);
+      try{localStorage.setItem('rs-theme',n);}catch(e){}
     });
     // scroll reveal
     var io=new IntersectionObserver(function(es){
