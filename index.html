@@ -213,11 +213,17 @@
   .card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--moss) 45%,var(--line));box-shadow:0 14px 40px rgba(20,17,12,.13)}
   .stat{transition:background .22s ease}
   .stat:hover{background:var(--surface-2)}
+  .soil .horizon{opacity:0;transform:translateX(-20px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in .soil .horizon{opacity:1;transform:none}
+  .reveal.in .soil .horizon:nth-child(2){transition-delay:.1s}
+  .reveal.in .soil .horizon:nth-child(3){transition-delay:.2s}
+  .reveal.in .soil .horizon:nth-child(4){transition-delay:.3s}
   @media (prefers-reduced-motion:reduce){
     #fx{display:none}
     .hero .kicker,.hero h1,.hero .lead,.hero .cta-row,.hero .stat-strip{animation:none}
     .reveal{filter:none}
     .node{transition:none}
+    .soil .horizon{opacity:1;transform:none;transition:none}
   }
 </style>
 <script>(function(){try{var s=localStorage.getItem('rs-theme');document.documentElement.setAttribute('data-theme',s==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
@@ -581,19 +587,20 @@
     // spine nodes activate as sections scroll in (measurement axis)
     var no=new IntersectionObserver(function(es){
       es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});
-    },{threshold:1,rootMargin:'-40% 0px -40% 0px'});
+    },{threshold:0,rootMargin:'0px 0px -45% 0px'});
     document.querySelectorAll('.node').forEach(function(n){no.observe(n);});
 
-    // scroll progress bar
+    // scroll progress bar (robust: window.scrollY + scrollingElement, bo body jest scrollerem)
     var prog=document.getElementById('prog');
-    function onScroll(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
-      prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%';}
+    function onScroll(){var se=document.scrollingElement||document.documentElement;
+      var max=se.scrollHeight-window.innerHeight;
+      prog.style.width=(max>0?Math.min(100,Math.max(0,window.scrollY/max*100)):0)+'%';}
     addEventListener('scroll',onScroll,{passive:true}); onScroll();
 
     // hero sensor field (canvas) — the digital-twin motif, alive and subtle
     var c=document.getElementById('fx');
     if(c && !reduce){
-      var x=c.getContext('2d'),hero=c.parentElement,dpr=Math.min(devicePixelRatio||1,2),pts=[],raf=null;
+      var x=c.getContext('2d'),hero=c.parentElement,dpr=Math.min(devicePixelRatio||1,2),pts=[],raf=null,mouse={x:-1e4,y:-1e4};
       function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
       function size(){var r=hero.getBoundingClientRect();c.width=Math.max(1,r.width*dpr);c.height=Math.max(1,r.height*dpr);c.style.width=r.width+'px';c.style.height=r.height+'px';}
       function init(){pts=[];var n=Math.min(48,Math.floor(c.width/dpr/28));for(var i=0;i<n;i++)pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.14*dpr,vy:(Math.random()-.5)*.14*dpr,r:(Math.random()*1.5+.7)*dpr});}
@@ -604,12 +611,18 @@
           if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;
           for(var j=i+1;j<pts.length;j++){var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
             if(d<lim){x.globalAlpha=(1-d/lim)*.13;x.strokeStyle=moss;x.lineWidth=1*dpr;x.beginPath();x.moveTo(p.x,p.y);x.lineTo(q.x,q.y);x.stroke();}}}
+        var mlim=175*dpr;
+        for(var m=0;m<pts.length;m++){var pm=pts[m],mdx=pm.x-mouse.x,mdy=pm.y-mouse.y,md=Math.sqrt(mdx*mdx+mdy*mdy);
+          if(md<mlim){x.globalAlpha=(1-md/mlim)*.34;x.strokeStyle=moss;x.lineWidth=1.2*dpr;x.beginPath();x.moveTo(pm.x,pm.y);x.lineTo(mouse.x,mouse.y);x.stroke();}}
         for(var k=0;k<pts.length;k++){var pp=pts[k];x.globalAlpha=.45;x.fillStyle=moss;x.beginPath();x.arc(pp.x,pp.y,pp.r,0,6.2832);x.fill();}
+        if(mouse.x>-1e3){x.globalAlpha=.7;x.fillStyle=moss;x.beginPath();x.arc(mouse.x,mouse.y,2.4*dpr,0,6.2832);x.fill();}
         x.globalAlpha=1;raf=requestAnimationFrame(draw);
       }
       function start(){if(!raf){raf=requestAnimationFrame(draw);}}
       function stop(){if(raf){cancelAnimationFrame(raf);raf=null;}}
       size();init();start();
+      hero.addEventListener('mousemove',function(ev){var r=hero.getBoundingClientRect();mouse.x=(ev.clientX-r.left)*dpr;mouse.y=(ev.clientY-r.top)*dpr;},{passive:true});
+      hero.addEventListener('mouseleave',function(){mouse.x=-1e4;mouse.y=-1e4;});
       var rt;addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){stop();size();init();start();},150);});
       new IntersectionObserver(function(e){e[0].isIntersecting?start():stop();},{threshold:0}).observe(hero);
     }
