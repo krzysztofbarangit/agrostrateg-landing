@@ -1,0 +1,386 @@
+<title>Regeneratywne stado — konsorcjum AGROSTRATEG</title>
+<style>
+  :root{
+    /* light — limed field / dried grass ground */
+    --ground:#ECEBE3; --surface:#F6F5EF; --surface-2:#E4E2D6;
+    --ink:#1B1712; --ink-soft:#57503F; --ink-faint:#8B836E;
+    --spine:#FBFAF4; --spine-edge:#CFC9B6;
+    --moss:#3C6A38; --moss-2:#2B4E29; --wheat:#A9812E;
+    --line:rgba(27,23,18,.13); --line-2:rgba(27,23,18,.07);
+    --shadow:0 1px 2px rgba(27,23,18,.05),0 8px 30px rgba(27,23,18,.07);
+    --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --font-body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,"Liberation Mono",monospace;
+    --maxw:74rem;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      /* dark — humus body with a light dorsal stripe: the białogrzbieta itself */
+      --ground:#131009; --surface:#1C180F; --surface-2:#241F14;
+      --ink:#ECE6D7; --ink-soft:#AEA488; --ink-faint:#7C7460;
+      --spine:#F3EFE2; --spine-edge:#4A432F;
+      --moss:#84B064; --moss-2:#5C8C46; --wheat:#D8B457;
+      --line:rgba(236,230,215,.14); --line-2:rgba(236,230,215,.07);
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#ECEBE3; --surface:#F6F5EF; --surface-2:#E4E2D6;
+    --ink:#1B1712; --ink-soft:#57503F; --ink-faint:#8B836E;
+    --spine:#FBFAF4; --spine-edge:#CFC9B6;
+    --moss:#3C6A38; --moss-2:#2B4E29; --wheat:#A9812E;
+    --line:rgba(27,23,18,.13); --line-2:rgba(27,23,18,.07);
+    --shadow:0 1px 2px rgba(27,23,18,.05),0 8px 30px rgba(27,23,18,.07);
+  }
+  :root[data-theme="dark"]{
+    --ground:#131009; --surface:#1C180F; --surface-2:#241F14;
+    --ink:#ECE6D7; --ink-soft:#AEA488; --ink-faint:#7C7460;
+    --spine:#F3EFE2; --spine-edge:#4A432F;
+    --moss:#84B064; --moss-2:#5C8C46; --wheat:#D8B457;
+    --line:rgba(236,230,215,.14); --line-2:rgba(236,230,215,.07);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--font-body);font-size:clamp(15px,1.02vw,17px);line-height:1.65;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:clamp(1.1rem,4vw,2.5rem)}
+  section{position:relative;padding-block:clamp(3.2rem,8vw,6rem)}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em;line-height:1.08;text-wrap:balance;margin:0}
+  p{margin:0}
+  a{color:inherit}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--moss);font-weight:600}
+  .lead{color:var(--ink-soft);font-size:clamp(1.05rem,1.5vw,1.28rem);line-height:1.55;max-width:60ch}
+
+  /* ---- spine: the białogrzbieta dorsal stripe, doubling as a measurement axis ---- */
+  .spine{position:absolute;top:0;bottom:0;left:50%;width:2px;transform:translateX(-50%);
+    background:linear-gradient(var(--spine-edge),var(--spine) 8%,var(--spine) 92%,var(--spine-edge));
+    opacity:.5;z-index:0;pointer-events:none}
+  @media (max-width:760px){.spine{left:1.4rem}}
+  .node{position:absolute;left:50%;top:clamp(3.2rem,8vw,6rem);width:11px;height:11px;transform:translate(-50%,-50%) rotate(45deg);
+    background:var(--ground);border:2px solid var(--moss);z-index:1}
+  @media (max-width:760px){.node{left:1.4rem}}
+  section>.wrap{position:relative;z-index:1}
+
+  /* ---- top bar ---- */
+  header.bar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
+    background:color-mix(in srgb,var(--ground) 82%,transparent);border-bottom:1px solid var(--line-2)}
+  .bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.7rem}
+  .brand{display:flex;align-items:center;gap:.6rem;font-family:var(--font-display);font-weight:600;letter-spacing:-.01em}
+  .brand .mk{width:14px;height:22px;border-radius:2px;flex:0 0 auto;
+     background:linear-gradient(var(--spine) 0 100%) center/3px 100% no-repeat,var(--moss)}
+  .bar nav{display:flex;gap:1.4rem;align-items:center}
+  .bar nav a{font-size:.85rem;color:var(--ink-soft);text-decoration:none}
+  .bar nav a:hover{color:var(--ink)}
+  @media (max-width:720px){.bar nav a.nl{display:none}}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;font:inherit;font-size:.9rem;font-weight:600;
+    padding:.62rem 1.05rem;border-radius:999px;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:transform .15s,background .2s,border-color .2s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-solid{background:var(--moss);color:#fff}
+  :root[data-theme="light"] .btn-solid{color:#fff}
+  .btn-solid:hover{background:var(--moss-2)}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:transparent}
+  .btn-ghost:hover{border-color:var(--moss);color:var(--moss)}
+  .theme-toggle{background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;width:34px;height:34px;cursor:pointer;font-size:.9rem;display:grid;place-items:center}
+  .theme-toggle:hover{border-color:var(--moss);color:var(--moss)}
+
+  /* ---- hero ---- */
+  .hero{padding-top:clamp(3rem,7vw,5.5rem)}
+  .hero .kicker{display:inline-flex;gap:.6rem;align-items:center;margin-bottom:1.3rem}
+  .hero h1{font-size:clamp(2.3rem,6.2vw,4.4rem);margin-bottom:1.2rem}
+  .hero h1 em{font-style:normal;color:var(--moss);position:relative}
+  .hero .lead{margin-bottom:2rem}
+  .cta-row{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:2.6rem}
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  @media (max-width:640px){.stat-strip{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--surface);padding:1.05rem 1.1rem}
+  .stat b{display:block;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:clamp(1.15rem,2.4vw,1.6rem);font-weight:600;letter-spacing:-.02em}
+  .stat span{font-size:.76rem;color:var(--ink-faint);letter-spacing:.02em}
+  .stat.accent b{color:var(--wheat)}
+
+  /* ---- generic section head ---- */
+  .shead{max-width:64ch;margin-bottom:2.4rem}
+  .shead h2{font-size:clamp(1.7rem,3.6vw,2.5rem);margin:.7rem 0 .8rem}
+
+  /* ---- cards ---- */
+  .grid{display:grid;gap:1.1rem}
+  .g-2{grid-template-columns:repeat(2,1fr)}
+  .g-3{grid-template-columns:repeat(3,1fr)}
+  .g-4{grid-template-columns:repeat(4,1fr)}
+  @media (max-width:860px){.g-3,.g-4{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.g-2,.g-3,.g-4{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.35rem;box-shadow:var(--shadow)}
+  .card h3{font-size:1.14rem;margin-bottom:.5rem}
+  .card p{color:var(--ink-soft);font-size:.95rem}
+  .card .tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--moss);display:inline-block;margin-bottom:.7rem}
+  .card .num{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-faint)}
+
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.4rem,4vw,3rem);align-items:start}
+  @media (max-width:820px){.split{grid-template-columns:1fr}}
+
+  /* honest caveat */
+  .caveat{border-left:3px solid var(--wheat);background:var(--surface-2);border-radius:0 12px 12px 0;padding:1.15rem 1.3rem}
+  .caveat b{color:var(--wheat)}
+  .caveat p{color:var(--ink-soft);font-size:.93rem}
+
+  /* soil horizons */
+  .soil{border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+  .horizon{display:grid;grid-template-columns:6.5rem 1fr;gap:1rem;align-items:center;padding:1rem 1.2rem;color:#F3EFE2}
+  .horizon .d{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:.95rem;opacity:.9}
+  .horizon .m{font-size:.9rem;line-height:1.4}
+  .horizon .m b{font-weight:600}
+  .h1x{background:#2E2318}.h2x{background:#3B2E1E}.h3x{background:#4A3B27}.h4x{background:#5B4A31}
+
+  /* method chips */
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+  .chip{font-family:var(--font-mono);font-size:.76rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;color:var(--ink-soft);background:var(--surface)}
+  .chip b{color:var(--moss);font-weight:600}
+
+  /* partner role cards */
+  .role{position:relative;overflow:hidden}
+  .role .who{font-family:var(--font-mono);font-size:.72rem;color:var(--wheat);letter-spacing:.06em;margin-top:.8rem;display:block}
+  .benefit{display:flex;gap:.7rem;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--line-2)}
+  .benefit:first-child{border-top:0}
+  .benefit .mono{color:var(--moss);font-weight:600;flex:0 0 auto;font-size:.9rem}
+
+  /* timeline */
+  .tl{display:grid;gap:0}
+  .tl .row{display:grid;grid-template-columns:8.5rem 1fr;gap:1.1rem;padding:.85rem 0;border-top:1px solid var(--line)}
+  .tl .row:first-child{border-top:0}
+  .tl .wk{font-family:var(--font-mono);font-size:.82rem;color:var(--moss);font-weight:600;font-variant-numeric:tabular-nums}
+  .tl .wt{color:var(--ink-soft);font-size:.94rem}
+  .deadline{margin-top:1.4rem;display:inline-flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.9rem;
+    color:var(--wheat);border:1px dashed var(--wheat);border-radius:999px;padding:.5rem .95rem}
+
+  /* CTA */
+  .final{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(1.8rem,5vw,3.2rem);text-align:center;box-shadow:var(--shadow)}
+  .final h2{font-size:clamp(1.8rem,4vw,2.7rem);margin-bottom:.9rem}
+  .final .lead{margin-inline:auto;margin-bottom:1.7rem}
+  .contact-note{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-faint);margin-top:1.2rem}
+
+  footer{border-top:1px solid var(--line);padding-block:2rem;color:var(--ink-faint)}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;font-size:.8rem}
+  .disclaimer{max-width:60ch;line-height:1.5}
+
+  /* motion */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none;transition:none}
+    .btn:hover{transform:none}
+  }
+  :focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:4px}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="mk" aria-hidden="true"></span> Regeneratywne&nbsp;stado</div>
+    <nav>
+      <a class="nl" href="#idea">Teza</a>
+      <a class="nl" href="#pole">Co wnosimy</a>
+      <a class="nl" href="#narzedzie">Narzędzie</a>
+      <a class="nl" href="#partnerzy">Partnerzy</a>
+      <a class="btn btn-solid" href="#kontakt">Dołącz do konsorcjum</a>
+      <button class="theme-toggle" id="tt" aria-label="Przełącz motyw">◐</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="spine" aria-hidden="true"></span>
+  <div class="wrap">
+    <span class="kicker eyebrow">NCBR · AGROSTRATEG · konsorcjum w budowie</span>
+    <h1>Dobrze wypasane stado <em>buduje</em> glebę — udowodnijmy to razem.</h1>
+    <p class="lead">100 hektarów, ponad 100 sztuk rodzimej białogrzbietki i pełny system pomiaru. Chcemy naukowo wykazać <strong>redukcję śladu węglowego netto</strong> hodowli i dać rolnikom narzędzie AI, które sam efekt udokumentuje — niezależnie od rasy bydła.</p>
+    <div class="cta-row">
+      <a class="btn btn-solid" href="#kontakt">Dołącz do konsorcjum</a>
+      <a class="btn btn-ghost" href="#pole">Zobacz, co wnosimy</a>
+    </div>
+    <div class="stat-strip" role="list">
+      <div class="stat" role="listitem"><b class="mono">300 mln</b><span>pula konkursu (zł)</span></div>
+      <div class="stat" role="listitem"><b class="mono">do 25 mln</b><span>na projekt (zł)</span></div>
+      <div class="stat" role="listitem"><b class="mono">80–100%</b><span>poziom dofinansowania</span></div>
+      <div class="stat accent" role="listitem"><b class="mono">28.08.2026</b><span>termin naboru</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="idea">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Teza, którą chcemy udowodnić</span>
+        <h2 style="margin:.7rem 0 .9rem;font-size:clamp(1.7rem,3.6vw,2.5rem)">Rotacyjny wypas przenosi węgiel z atmosfery do próchnicy.</h2>
+        <p class="lead">Bydło dzielone na małe kwatery, z długim odpoczynkiem runi, pobudza korzenie traw do wiązania węgla w glebie. Ten węgiel — wraz z poprawą bioróżnorodności, retencji wody i dobrostanu — kompensuje część emisji metanu. Celem projektu jest zmierzyć ten bilans rzetelnie i powtarzalnie.</p>
+      </div>
+      <div class="caveat">
+        <p><b>Czego świadomie nie obiecujemy.</b> Nie twierdzimy, że bydło jest „zeroemisyjne" — sekwestracja gleby nasyca się i nie jest wieczna, a spór o metrykę metanu jest realny. Mówimy o <strong>warunkowej, mierzalnej redukcji śladu netto</strong> w określonym oknie czasowym, raportowanej uczciwie w dwóch metrykach (GWP100 i GWP*). Ta ostrożność jest naszą przewagą przed panelem, nie słabością.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pole">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="shead">
+      <span class="eyebrow">Co wnosimy do stołu</span>
+      <h2>Pole badawcze, którego nie trzeba budować.</h2>
+      <p class="lead">Większość projektów musiałaby dopiero stworzyć warunki do badań. My mamy gotowe, realne, wieloletnie stanowisko — i unikalny materiał genetyczny.</p>
+    </div>
+    <div class="grid g-3">
+      <div class="card"><span class="tag">Areał</span><h3><span class="mono">100 ha</span> użytków zielonych</h3><p>Gotowe do podziału na kwatery pod wypas rotacyjny i poletka pomiarowe z powtórzeniami i grupą kontrolną.</p></div>
+      <div class="card"><span class="tag">Stado</span><h3><span class="mono">100+</span> sztuk białogrzbietki</h3><p>Rodzima rasa zachowawcza na wolnym wybiegu — dobrostan i naturalne zachowania wpisane w chów, a nie dodane na potrzeby wniosku.</p></div>
+      <div class="card"><span class="tag">Dane</span><h3>Unikalny zbiór treningowy</h3><p>Modele AI kalibruje się dziś niemal wyłącznie na rasie holsztyńsko-fryzyjskiej. Białogrzbieta daje własny, wyróżniający zbiór — i argument o transferowalności.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="narzedzie">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="shead">
+      <span class="eyebrow">Rezultat wdrożeniowy</span>
+      <h2>Nie raport — narzędzie. „Cyfrowy bliźniak" gospodarstwa.</h2>
+      <p class="lead">Jedna platforma AI spina dane zwierzę + gleba + pastwisko + emisje w jeden model z natywnym pomiarem (MRV). Rynek jest dziś silosowy — osobno wypas, osobno węgiel, osobno metan. Nikt nie łączy tego w jeden zwalidowany system. To nasza nisza — i wprost punkty T2.5 (czujniki + AI) oraz T3 (rolnictwo cyfrowe).</p>
+    </div>
+    <div class="grid g-4">
+      <div class="card"><span class="num">MVP · dojrzałe</span><h3>Dobrostan z wideo</h3><p>Kamery rozpoznają kulawiznę, kondycję i osobniki — pręga białogrzbietki ułatwia identyfikację.</p></div>
+      <div class="card"><span class="num">MVP · dojrzałe</span><h3>Behawior z obroży</h3><p>Wypas, przeżuwanie, ruch z czujnika; obroża pełni podwójną rolę — dane i wirtualne ogrodzenie.</p></div>
+      <div class="card"><span class="num">MVP · dojrzałe</span><h3>Pastwisko z satelity</h3><p>Sentinel + ML szacują biomasę i wysokość runi na każdej kwaterze — wejście do bilansu paszowego.</p></div>
+      <div class="card"><span class="num">MVP · dojrzałe</span><h3>Silnik rotacji wypasu</h3><p>Model podpowiada, kiedy przenieść stado i ile dni odpoczynku dać kwaterze.</p></div>
+      <div class="card" style="grid-column:span 2"><span class="num" style="color:var(--wheat)">Wyróżnik · ambitne</span><h3>Tani pomiar metanu z proxy</h3><p>Referencyjny GreenFeed kalibruje predyktor emisji z tańszych sygnałów — szacunek dla całego stada bez drogiej komory. Uczciwie: to skrining, nie pomiar komorowy.</p></div>
+      <div class="card" style="grid-column:span 2"><span class="num" style="color:var(--wheat)">Wyróżnik · ambitne</span><h3>Węgiel gleby + agent raportujący</h3><p>Spektroskopia i ML szacują węgiel, a agent LLM automatyzuje raport MRV i ścieżkę do jednostek carbon farming (rama UE CRCF).</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="metoda">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="shead">
+      <span class="eyebrow">Jak to udowodnimy</span>
+      <h2>Rygor, który przekona recenzenta.</h2>
+      <p class="lead">Projekt oparty na powtórzeniach i grupie kontrolnej (wzorzec platformy North Wyke) — replikowalny, odporny na krytykę „szkoły Savory'ego". Węgiel mierzymy przez cały profil glebowy, nie tylko wierzchnią warstwę.</p>
+    </div>
+    <div class="split">
+      <div class="soil" role="img" aria-label="Profil glebowy: warstwy pomiaru węgla od 0 do 100 cm">
+        <div class="horizon h1x"><span class="d">0–10 cm</span><span class="m"><b>Próchnica czynna.</b> Rdzenie, gęstość objętościowa, węgiel metodą spalania suchego.</span></div>
+        <div class="horizon h2x"><span class="d">10–30 cm</span><span class="m"><b>Strefa korzeniowa.</b> Główny zapas SOC; korekta o równoważną masę gleby (ESM).</span></div>
+        <div class="horizon h3x"><span class="d">30–50 cm</span><span class="m"><b>Podglebie.</b> Warstwa często pomijana — u nas mierzona, bo zaniżanie zapasu tu boli.</span></div>
+        <div class="horizon h4x"><span class="d">50–100 cm</span><span class="m"><b>Głęboki węgiel.</b> Trwalsze pule; model RothC ekstrapoluje trajektorię poza okno projektu.</span></div>
+      </div>
+      <div>
+        <h3 style="font-size:1.2rem;margin-bottom:.6rem">Dwa bilanse, dwie metryki</h3>
+        <p class="lead" style="font-size:1rem">Emisje bydła mierzymy bezpośrednio (GreenFeed), tlenek azotu z gleby komorami, a całość liczymy w pełnym cyklu życia — i raportujemy równolegle w GWP100 oraz GWP*, z jawnym omówieniem nasycenia i trwałości węgla.</p>
+        <div class="chips">
+          <span class="chip"><b>SOC:</b> Dumas · ESM · RothC</span>
+          <span class="chip"><b>Metan:</b> GreenFeed</span>
+          <span class="chip"><b>N₂O:</b> komory GRACEnet</span>
+          <span class="chip"><b>Bilans:</b> pełne LCA</span>
+          <span class="chip"><b>Metryki:</b> GWP100 + GWP*</span>
+        </div>
+        <p class="lead" style="font-size:.92rem;margin-top:1.1rem;color:var(--ink-faint)">Fundament metodyczny: VM0042 × IPCC 2019 Tier 2 × GRACEnet × unijna rama carbon farming (CRCF 2024).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="partnerzy">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="shead">
+      <span class="eyebrow">Konsorcjum — trzon już jest</span>
+      <h2>Zostało jedno ogniwo do domknięcia.</h2>
+      <p class="lead">Lideruje <strong>Stacja Ekologiczna Wokiele Sp. z o.o.</strong>, a partnerem naukowym jest <strong>Uniwersytet Warszawski — Centrum Nauk Biologiczno-Chemicznych</strong>. Brakuje nam ostatniej kompetencji: <strong>zootechniki i pomiaru emisji enterycznych</strong>.</p>
+    </div>
+    <div class="grid g-3">
+      <div class="card role"><span class="tag" style="color:var(--moss)">✓ Konsorcjant</span><h3>Biologia · gleba · mikrobiom</h3><p>Grzyby glebowe i symbioza mikoryzowa (T1.10) oraz chemia analityczna pomiaru węgla i pierwiastków — filary rzetelnego MRV gleby.</p><span class="who" style="color:var(--moss)">UW — Centrum Nauk Biologiczno-Chemicznych · prof. Marta Wrzosek (mykologia) · prof. Ewa Bulska (chemia analityczna)</span></div>
+      <div class="card role" style="border-color:var(--wheat)"><span class="tag" style="color:var(--wheat)">◇ Poszukiwany</span><h3>Zootechnika · emisje enteryczne</h3><p>Pomiar metanu w żwaczu, żywienie przeżuwaczy, dobrostan i rasa rodzima (obszar T2). To ogniwo, którego nam brakuje.</p><span class="who">Kierunek: IZ PIB Balice / UWM Olsztyn</span></div>
+      <div class="card role"><span class="tag">Lider</span><h3>Technologia · AI · MRV</h3><p>Cyfrowy bliźniak, modele widzenia i predykcji, integracja danych i raportowanie (obszar T3).</p><span class="who">Stacja Ekologiczna Wokiele Sp. z o.o.</span></div>
+    </div>
+    <div class="split" style="margin-top:1.6rem">
+      <div class="card">
+        <span class="tag">Co zyskuje partner naukowy</span>
+        <div class="benefit"><span class="mono">100%</span><p>Organizacja badawcza może uzyskać do 100% dofinansowania swojej części — bez wkładu własnego.</p></div>
+        <div class="benefit"><span class="mono">1×</span><p>Pionierski w Polsce projekt regeneratywnej hodowli z pełnym MRV — publikacje i pozycja lidera tematu.</p></div>
+        <div class="benefit"><span class="mono">100 ha</span><p>Gotowe, realne pole badawcze z rzadką rasą — bez kosztów i lat na jego zbudowanie.</p></div>
+      </div>
+      <div class="card">
+        <span class="tag">Ramy współpracy</span>
+        <div class="benefit"><span class="mono">≤5</span><p>Podmiotów w konsorcjum; liderem może być przedsiębiorstwo lub organizacja badawcza.</p></div>
+        <div class="benefit"><span class="mono">36 m-cy</span><p>Maksymalny okres realizacji — plan badawczy domknięty w tym oknie, z mierzalnymi kamieniami milowymi.</p></div>
+        <div class="benefit"><span class="mono">+15%</span><p>Premia do intensywności za współpracę nauka–biznes i szerokie upowszechnianie wyników.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="teraz">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="shead">
+      <span class="eyebrow">Dlaczego teraz</span>
+      <h2>Okno jest wąskie — dlatego rozmawiamy dziś.</h2>
+      <p class="lead">Nabór zamyka się 28 sierpnia 2026. Konkurencyjny wniosek konsorcjalny powstaje w kilka tygodni — kluczowy jest szybki skład zespołu.</p>
+    </div>
+    <div class="split">
+      <div class="tl">
+        <div class="row"><span class="wk">Tydz. 1–2</span><span class="wt">Potwierdzenie partnerów, decyzja o liderze i strukturze konsorcjum.</span></div>
+        <div class="row"><span class="wk">Tydz. 2–3</span><span class="wt">Dane o polu i glebie, koncepcja parcel, oferty kosztowe do budżetu.</span></div>
+        <div class="row"><span class="wk">Tydz. 3–5</span><span class="wt">Szkielet wniosku pod kryteria, metodyka, plan wdrożenia, kosztorys.</span></div>
+        <div class="row"><span class="wk">Tydz. 6</span><span class="wt">Redakcja, przegląd „czerwonego zespołu", złożenie w systemie LSI z zapasem.</span></div>
+      </div>
+      <div>
+        <p class="lead" style="font-size:1rem">Grant premiuje potencjał wdrożenia i korzyści przed czystą nauką. Dlatego budujemy go wokół wdrażalnego narzędzia — a wiarygodność naukowa partnerów jest tym, co przenosi wniosek przez panel ekspertów.</p>
+        <span class="deadline mono">● termin: 28.08.2026, 16:00</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kontakt">
+  <span class="spine" aria-hidden="true"></span><span class="node" aria-hidden="true"></span>
+  <div class="wrap reveal">
+    <div class="final">
+      <span class="eyebrow">Porozmawiajmy</span>
+      <h2>Zbudujmy to konsorcjum.</h2>
+      <p class="lead">Jeśli Twój zespół zajmuje się glebą, przeżuwaczami, emisjami albo dobrostanem — chcemy z Wami rozmawiać. Krótkie spotkanie wystarczy, żeby ocenić dopasowanie.</p>
+      <a class="btn btn-solid" href="#" id="cta-mail">Umów rozmowę</a>
+      <p class="contact-note">kontakt: [do uzupełnienia — e-mail / telefon zespołu]</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brand"><span class="mk" aria-hidden="true"></span> Regeneratywne&nbsp;stado</span>
+    <p class="disclaimer">Materiał roboczy na potrzeby rozmów partnerskich w konkursie NCBR AGROSTRATEG. Lider: Stacja Ekologiczna Wokiele Sp. z o.o.; partner naukowy: UW — Centrum Nauk Biologiczno-Chemicznych. Partnera zootechnicznego (IZ PIB / UWM) wskazano jako <strong>poszukiwanego</strong>. Dane liczbowe wg dokumentacji konkursowej NCBR.</p>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var tt=document.getElementById('tt');
+    function cur(){var r=document.documentElement;var a=r.getAttribute('data-theme');
+      if(a)return a;return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    tt.addEventListener('click',function(){
+      var n=cur()==='dark'?'light':'dark';
+      document.documentElement.setAttribute('data-theme',n);
+    });
+    // scroll reveal
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+    },{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  })();
+</script>
